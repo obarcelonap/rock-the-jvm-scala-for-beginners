@@ -12,6 +12,7 @@ object Command {
     case Exit.NAME => Exit
     case MkDir.NAME => MkDir
     case Ls.NAME => Ls
+    case Pwd.NAME => Pwd
     case _ => NotFound(name)
   }
 }
