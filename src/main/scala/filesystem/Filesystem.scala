@@ -1,28 +1,25 @@
 package filesystem
 
 import filesystem.CommandLine.NewCommand
-import filesystem.commands.{Exit, NotFound}
+import filesystem.commands.Command
+
+import scala.annotation.tailrec
 
 object Filesystem extends App {
 
-  def boot(commandLine: CommandLine, initialState: State): Int = {
-    var state = initialState
-    while (state.running) {
-      commandLine.write("> ")
-
-      val NewCommand(command, args) = commandLine.read()
-      state = state.copy(command = command, args = args)
-
-      state = state.command match {
-        case "exit" => Exit(state)
-        case _ => NotFound(state)
-      }
-
+  @tailrec
+  def boot(commandLine: CommandLine, state: State): State = {
+    if (!state.out.isEmpty) {
       commandLine.write(s"${state.out}\n")
     }
 
-    0
+    if (!state.running) state
+    else {
+      commandLine.write("> ")
+      val NewCommand(name, args) = commandLine.read()
+      boot(commandLine, Command.get(name)(state, args))
+    }
   }
 
-  boot(CommandLine(System.in, System.out), State())
+  boot(CommandLine(System.in, System.out), State(out = "Welcome"))
 }

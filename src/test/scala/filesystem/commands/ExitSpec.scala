@@ -1,6 +1,5 @@
 package filesystem.commands
 
-import filesystem.CommandLine.NewCommand
 import filesystem.State
 import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
@@ -15,11 +14,10 @@ class ExitSpec extends AnyFunSpec with Inside with Matchers {
       val newState = Exit(state)
 
       inside(newState) {
-        case State(running, _, _, out) =>
+        case State(running, _, out) =>
           running should be(false)
-          out should not be(empty)
+          out should not be (empty)
       }
-      newState.running should be(false)
     }
   }
 }
