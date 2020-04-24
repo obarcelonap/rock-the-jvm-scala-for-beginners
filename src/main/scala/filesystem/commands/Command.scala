@@ -11,6 +11,7 @@ object Command {
   def get(name: String): Command = name match {
     case Exit.NAME => Exit
     case MkDir.NAME => MkDir
+    case Ls.NAME => Ls
     case _ => NotFound(name)
   }
 }
