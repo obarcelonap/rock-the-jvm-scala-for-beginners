@@ -12,7 +12,7 @@ class LsSpec extends AnyFunSpec with Matchers {
 
       val newState = Ls(state)
 
-      newState.out should be (empty)
+      newState.out should be(empty)
     }
     it("should list dirs in cwd separated by tab") {
       val state = State(cwd = RootDir.copy(children = RootDir.children :+ Dir("one") :+ Dir("two")))

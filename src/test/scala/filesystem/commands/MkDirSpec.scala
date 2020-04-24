@@ -28,7 +28,7 @@ class MkDirSpec extends AnyFunSpec with Inside with Matchers {
       }
     }
     it("should create a dir on a folder") {
-      val parentDir = Dir("1st-level", RootDir)
+      val parentDir = Dir("1st-level")
       val state = State(cwd = parentDir)
 
       val newState = MkDir(state, List("2nd-level"))
@@ -41,7 +41,7 @@ class MkDirSpec extends AnyFunSpec with Inside with Matchers {
       }
     }
     it("should create a dir on a folder with other children") {
-      val parentDir = RootDir.copy(children = RootDir.children :+ Dir("1st"))
+      val parentDir = RootDir :+ "1st"
       val state = State(cwd = parentDir)
 
       val newState = MkDir(state, List("2nd"))
@@ -54,7 +54,7 @@ class MkDirSpec extends AnyFunSpec with Inside with Matchers {
       }
     }
     it("should output error when dir already exists") {
-      val parentDir = RootDir.copy(children = RootDir.children :+ Dir("1st"))
+      val parentDir = RootDir :+ "1st"
       val state = State(cwd = parentDir)
 
       val newState = MkDir(state, List("1st"))
