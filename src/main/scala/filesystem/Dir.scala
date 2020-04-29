@@ -1,12 +1,63 @@
 package filesystem
 
-case class Dir(
-                name: String,
-                parent: Dir = RootDir,
-                children: List[Dir] = List()
-              ) {
-  def :+(directory: String): Dir = copy(children = children :+ Dir(directory, this))
-  def hasChild(directory: String): Boolean = children.exists(dir => dir.name == directory)
+import scala.annotation.tailrec
+
+case class Dir(name: String, path: String = "", children: List[FileEntry] = List())
+  extends FileEntry {
+
+  val fullPath: String = s"$path${Dir.SEPARATOR}$name"
+  val isRoot: Boolean = fullPath.equals(Dir.SEPARATOR)
+
+  def hasChild(name: String): Boolean = findChild(name).isDefined
+  def findChild(name: String): Option[FileEntry] = children.find(entry => entry.name.equals(name))
+  def findChild(name: String, path: String = ""): Option[FileEntry] = {
+    @tailrec
+    def findDirRec(currentDir: Dir, pathSegments: List[String]): Option[FileEntry] =
+      if (pathSegments.isEmpty) currentDir.findChild(name)
+      else currentDir.findChild(pathSegments.head) match {
+        case Some(nextDir: Dir) => findDirRec(nextDir, pathSegments.tail)
+        case _ => None
+      }
+
+    findDirRec(this, Dir.splitInSegments(path))
+  }
+
+  def findChildDir(name: String, path: String = ""): Option[Dir] = findChild(name, path) match {
+    case Some(dir: Dir) => Some(dir)
+    case _ => None
+  }
+
+  def addEntry(entry: FileEntry, path: String = ""): Dir = {
+
+    def newEntry(path: String) = entry match {
+      case dir: Dir => dir.copy(path = path)
+      case _ => entry
+    }
+
+    def addEntryRec(currentDir: Dir, pathSegments: List[String]): Dir = {
+      if (pathSegments.isEmpty)
+        currentDir.copy(children = currentDir.children :+ newEntry(currentDir.fullPath))
+      else {
+        val NextSegment: String = pathSegments.head
+
+        currentDir.copy(children = currentDir.children.map {
+          case nextDir @ Dir(NextSegment, _, _) =>
+            addEntryRec(nextDir, pathSegments.tail)
+          case child => child
+        })
+      }
+    }
+
+    addEntryRec(this, Dir.splitInSegments(path))
+  }
 }
 
-object RootDir extends Dir("root") {}
+object Dir {
+  val SEPARATOR: String = "/"
+
+  def splitInSegments(path: String): List[String] = path.split(Dir.SEPARATOR)
+    .filter(_.nonEmpty)
+    .toList
+}
+
+object RootDir extends Dir("") {}

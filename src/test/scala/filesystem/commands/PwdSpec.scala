@@ -15,12 +15,11 @@ class PwdSpec extends AnyFunSpec with Matchers {
       newState.out should be("/")
     }
     it("should show dirs until root separated by slash when cwd is a nested folder") {
-      val level1 = Dir("level1") :+ "level2"
-      val state = State(cwd = level1.children.head)
+      val state = State(cwd = Dir("2nd", "/1st"))
 
       val newState = Pwd(state)
 
-      newState.out should be("/level1/level2")
+      newState.out should be("/1st/2nd")
     }
   }
 }

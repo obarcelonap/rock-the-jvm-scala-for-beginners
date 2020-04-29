@@ -1,19 +1,8 @@
 package filesystem.commands
 
-import filesystem.{Dir, RootDir, State}
-
-import scala.annotation.tailrec
+import filesystem.State
 
 object Pwd extends Command {
   override val NAME: String = "pwd"
-  override def apply(state: State, args: List[String]): State = {
-    @tailrec
-    def dirNamesUntilRoot(dir: Dir, accum: List[String] = List()): List[String] =
-      if (dir == RootDir) accum
-      else dirNamesUntilRoot(dir.parent, dir.name +: accum)
-
-    state.out(
-      dirNamesUntilRoot(state.cwd)
-        .mkString("/", "/", ""))
-  }
+  override def apply(state: State, args: List[String]): State = state.out(state.cwd.fullPath)
 }

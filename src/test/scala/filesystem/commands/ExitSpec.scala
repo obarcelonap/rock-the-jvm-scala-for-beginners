@@ -14,7 +14,7 @@ class ExitSpec extends AnyFunSpec with Inside with Matchers {
       val newState = Exit(state)
 
       inside(newState) {
-        case State(running, _, out) =>
+        case State(running, _, _, out) =>
           running should be(false)
           out should not be (empty)
       }

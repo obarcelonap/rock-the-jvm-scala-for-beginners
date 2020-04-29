@@ -15,53 +15,51 @@ class MkDirSpec extends AnyFunSpec with Inside with Matchers {
       newState.out should startWith("usage")
     }
     it("should create a dir on root") {
-      val state = State(cwd = RootDir)
+      val state = State(root = RootDir, cwd = RootDir)
 
       val newState = MkDir(state, List("test-dir"))
 
-      inside(newState.cwd) {
-        case Dir(root, _, List(Dir(name, parent, children))) =>
-          root should be("root")
+      inside(newState.root) {
+        case Dir(_, _, List(Dir(name, path, children))) =>
           name should be("test-dir")
-          parent should be(RootDir)
+          path should be("/")
           children should be(empty)
       }
     }
     it("should create a dir on a folder") {
-      val parentDir = Dir("1st-level")
-      val state = State(cwd = parentDir)
+      val firstLevelDir = Dir("1st-level")
+      val rootDir = RootDir.copy(children = List(firstLevelDir))
+      val state = State(root = rootDir, cwd = firstLevelDir)
 
       val newState = MkDir(state, List("2nd-level"))
 
-      inside(newState.cwd) {
-        case Dir(parentDir.name, _, List(Dir(name, parent, children))) =>
+      inside(newState.root) {
+        case Dir(_, _, List(Dir(_, _, List(Dir(name, path, children))))) =>
           name should be("2nd-level")
-          parent should be(parentDir)
+          path should be("/1st-level")
           children should be(empty)
       }
     }
     it("should create a dir on a folder with other children") {
-      val parentDir = RootDir :+ "1st"
-      val state = State(cwd = parentDir)
+      val rootDir = RootDir.copy(children = List(Dir("1st")))
+      val state = State(root = rootDir, cwd = rootDir)
 
       val newState = MkDir(state, List("2nd"))
 
-      inside(newState.cwd) {
-        case Dir(root, _, List(Dir(first, _, _), Dir(second, _, _))) =>
-          root should be("root")
+      inside(newState.root) {
+        case Dir(_, _, List(Dir(first, _, _), Dir(second, _, _))) =>
           first should be("1st")
           second should be("2nd")
       }
     }
     it("should output error when dir already exists") {
-      val parentDir = RootDir :+ "1st"
-      val state = State(cwd = parentDir)
+      val rootDir = RootDir.copy(children = List(Dir("1st")))
+      val state = State(root = rootDir, cwd = rootDir)
 
       val newState = MkDir(state, List("1st"))
 
       inside(newState) {
-        case State(_, cwd, out) =>
-          cwd should be(parentDir)
+        case State(_, _, _, out) =>
           out should be("mkdir: 1st: File exists")
       }
     }
