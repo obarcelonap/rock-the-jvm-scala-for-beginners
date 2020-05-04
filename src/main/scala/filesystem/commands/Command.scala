@@ -14,6 +14,7 @@ object Command {
     case Ls.NAME => Ls
     case Pwd.NAME => Pwd
     case Touch.NAME => Touch
+    case Cd.NAME => Cd
     case _ => NotFound(name)
   }
 }

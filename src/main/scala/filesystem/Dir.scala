@@ -5,8 +5,8 @@ import scala.annotation.tailrec
 case class Dir(name: String, path: String = "", children: List[FileEntry] = List())
   extends FileEntry {
 
-  val fullPath: String = s"$path${Dir.SEPARATOR}$name"
-  val isRoot: Boolean = fullPath.equals(Dir.SEPARATOR)
+  val fullPath: String = Paths.fullPath(name, path)
+  val isRoot: Boolean = Paths.isRoot(fullPath)
 
   def hasChild(name: String): Boolean = findChild(name).isDefined
 
@@ -21,7 +21,7 @@ case class Dir(name: String, path: String = "", children: List[FileEntry] = List
         case _ => None
       }
 
-    findDirRec(this, Dir.splitInSegments(path))
+    findDirRec(this, Paths.splitInSegments(path))
   }
 
   def findChildDir(name: String, path: String = ""): Option[Dir] = findChild(name, path) match {
@@ -51,16 +51,8 @@ case class Dir(name: String, path: String = "", children: List[FileEntry] = List
       }
     }
 
-    addEntryRec(this, Dir.splitInSegments(path))
+    addEntryRec(this, Paths.splitInSegments(path))
   }
-}
-
-object Dir {
-  val SEPARATOR: String = "/"
-
-  def splitInSegments(path: String): List[String] = path.split(Dir.SEPARATOR)
-    .filter(_.nonEmpty)
-    .toList
 }
 
 object RootDir extends Dir("") {}
