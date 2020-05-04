@@ -9,7 +9,9 @@ case class Dir(name: String, path: String = "", children: List[FileEntry] = List
   val isRoot: Boolean = fullPath.equals(Dir.SEPARATOR)
 
   def hasChild(name: String): Boolean = findChild(name).isDefined
+
   def findChild(name: String): Option[FileEntry] = children.find(entry => entry.name.equals(name))
+
   def findChild(name: String, path: String = ""): Option[FileEntry] = {
     @tailrec
     def findDirRec(currentDir: Dir, pathSegments: List[String]): Option[FileEntry] =
@@ -31,6 +33,7 @@ case class Dir(name: String, path: String = "", children: List[FileEntry] = List
 
     def newEntry(path: String) = entry match {
       case dir: Dir => dir.copy(path = path)
+      case file: File => file.copy(path = path)
       case _ => entry
     }
 
@@ -41,7 +44,7 @@ case class Dir(name: String, path: String = "", children: List[FileEntry] = List
         val NextSegment: String = pathSegments.head
 
         currentDir.copy(children = currentDir.children.map {
-          case nextDir @ Dir(NextSegment, _, _) =>
+          case nextDir@Dir(NextSegment, _, _) =>
             addEntryRec(nextDir, pathSegments.tail)
           case child => child
         })

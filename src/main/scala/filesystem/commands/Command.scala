@@ -13,6 +13,7 @@ object Command {
     case MkDir.NAME => MkDir
     case Ls.NAME => Ls
     case Pwd.NAME => Pwd
+    case Touch.NAME => Touch
     case _ => NotFound(name)
   }
 }
