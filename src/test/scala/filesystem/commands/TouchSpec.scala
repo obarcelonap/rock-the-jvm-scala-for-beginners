@@ -50,7 +50,7 @@ class TouchSpec extends AnyFunSpec with Matchers with Inside {
     }
     it("should create an empty file inside a folder") {
       val firstLevelDir = Dir("1st-level")
-      val rootDir = RootDir.copy(children = List(firstLevelDir))
+      val rootDir = RootDir.copy(entries = List(firstLevelDir))
       val state = State(root = rootDir, cwd = firstLevelDir)
 
       val newState = Touch(state, List("emptyfile"))

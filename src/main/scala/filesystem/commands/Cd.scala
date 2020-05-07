@@ -21,7 +21,7 @@ object Cd extends Command {
       val path = segments.init
       val directory = segments.last
 
-      state.root.findChild(directory, path.mkString("/")) match {
+      state.root.findEntry(directory, path.mkString("/")) match {
         case Some(dir: Dir) => state.copy(cwd = dir).cleanOut()
         case Some(_) => state.out(s"cd: not a directory: $directory")
         case _ => state.out(s"cd: no such file or directory: $directory")

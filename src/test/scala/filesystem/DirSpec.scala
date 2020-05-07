@@ -6,29 +6,29 @@ import org.scalatest.matchers.should.Matchers
 
 class DirSpec extends AnyFunSpec with Matchers with Inside with OptionValues {
 
-  describe("findChildDir with path param") {
-    it("should return empty when no children") {
+  describe("findEntry") {
+    it("should return empty when no entries") {
       val dir = Dir("empty")
 
-      val child = dir.findChildDir("anything", "/does/not/matter")
+      val entry = dir.findEntry("anything", "/does/not/matter")
 
-      child should be(empty)
+      entry should be(empty)
     }
 
-    it("should return empty when children does not match the initial path") {
+    it("should return empty when entries does not match the initial path") {
       val dir = Dir("a", "/", List(Dir("b"), Dir("c")))
 
-      val child = dir.findChildDir("anything", "/does/not/matter")
+      val entry = dir.findEntry("anything", "/does/not/matter")
 
-      child should be(empty)
+      entry should be(empty)
     }
 
-    it("should return empty when children does not match the path after some match") {
+    it("should return empty when entries does not match the path after some match") {
       val dir = Dir("a", "/", List(Dir("b"), Dir("c")))
 
-      val child = dir.findChildDir("anything", "/a/not-expected")
+      val entry = dir.findEntry("anything", "/a/not-expected")
 
-      child should be(empty)
+      entry should be(empty)
     }
 
     it("should return the dir when is found nested at one level") {
@@ -37,9 +37,9 @@ class DirSpec extends AnyFunSpec with Matchers with Inside with OptionValues {
         List(Dir("b"), Dir("c", "/a/",
           List(expected))))
 
-      val child = dir.findChildDir("expected", "/c/")
+      val entry = dir.findEntry("expected", "/c/")
 
-      child should be(Some(expected))
+      entry should be(Some(expected))
     }
 
     it("should return the dir when is found nested at two levels") {
@@ -49,9 +49,9 @@ class DirSpec extends AnyFunSpec with Matchers with Inside with OptionValues {
           List(Dir("c", "/a/b/",
             List(expected))))))
 
-      val child = dir.findChildDir("expected", "/b/c/")
+      val entry = dir.findEntry("expected", "/b/c/")
 
-      child should be(Some(expected))
+      entry should be(Some(expected))
     }
   }
 
@@ -70,8 +70,8 @@ class DirSpec extends AnyFunSpec with Matchers with Inside with OptionValues {
       val newRoot = RootDir.addEntry(Dir("a"), "/does/not/exist")
 
       inside(newRoot) {
-        case Dir(_, _, children) =>
-          children should be (empty)
+        case Dir(_, _, entries) =>
+          entries should be (empty)
       }
     }
 
@@ -89,8 +89,8 @@ class DirSpec extends AnyFunSpec with Matchers with Inside with OptionValues {
       val newRoot = Dir("a").addEntry(Dir("b"), "/does/not/exist")
 
       inside(newRoot) {
-        case Dir(_, _, children) =>
-          children should be (empty)
+        case Dir(_, _, entries) =>
+          entries should be (empty)
       }
     }
 

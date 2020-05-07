@@ -20,28 +20,28 @@ class MkDirSpec extends AnyFunSpec with Inside with Matchers {
       val newState = MkDir(state, List("test-dir"))
 
       inside(newState.root) {
-        case Dir(_, _, List(Dir(name, path, children))) =>
+        case Dir(_, _, List(Dir(name, path, entries))) =>
           name should be("test-dir")
           path should be("/")
-          children should be(empty)
+          entries should be(empty)
       }
     }
     it("should create a dir on a folder") {
       val firstLevelDir = Dir("1st-level")
-      val rootDir = RootDir.copy(children = List(firstLevelDir))
+      val rootDir = RootDir.copy(entries = List(firstLevelDir))
       val state = State(root = rootDir, cwd = firstLevelDir)
 
       val newState = MkDir(state, List("2nd-level"))
 
       inside(newState.root) {
-        case Dir(_, _, List(Dir(_, _, List(Dir(name, path, children))))) =>
+        case Dir(_, _, List(Dir(_, _, List(Dir(name, path, entries))))) =>
           name should be("2nd-level")
           path should be("/1st-level")
-          children should be(empty)
+          entries should be(empty)
       }
     }
-    it("should create a dir on a folder with other children") {
-      val rootDir = RootDir.copy(children = List(Dir("1st")))
+    it("should create a dir on a folder with other entries") {
+      val rootDir = RootDir.copy(entries = List(Dir("1st")))
       val state = State(root = rootDir, cwd = rootDir)
 
       val newState = MkDir(state, List("2nd"))
@@ -53,7 +53,7 @@ class MkDirSpec extends AnyFunSpec with Inside with Matchers {
       }
     }
     it("should output error when dir already exists") {
-      val rootDir = RootDir.copy(children = List(Dir("1st")))
+      val rootDir = RootDir.copy(entries = List(Dir("1st")))
       val state = State(root = rootDir, cwd = rootDir)
 
       val newState = MkDir(state, List("1st"))

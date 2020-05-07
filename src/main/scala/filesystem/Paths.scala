@@ -27,4 +27,6 @@ object Paths {
     else if (PREV_DIR.equals(segments.head) && accum.nonEmpty) collapse(segments.tail, accum.init)
     else collapse(segments.tail, accum :+ segments.head)
   }
+
+  def splitAndCollapse(path:String): List[String] = collapse(splitInSegments(path))
 }
