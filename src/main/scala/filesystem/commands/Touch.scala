@@ -12,14 +12,9 @@ object Touch extends Command {
       if (state.cwd.hasEntry(filename)) state.out(s"touch: ${filename}: File exists")
       else {
         val newRoot = state.root.addEntry(File(filename), state.cwd.absolutePath)
-        val newCwd = if (state.cwd.isRoot) newRoot
-        else newRoot.findEntry(state.cwd.name, state.cwd.path) match {
-          case Some(dir: Dir) => dir
-          case _ => throw new RuntimeException("error: cannot find cwd in the filesystem")
-        }
 
         state
-          .copy(root = newRoot, cwd = newCwd)
+          .changeRoot(newRoot)
           .cleanOut()
       }
     }

@@ -11,15 +11,10 @@ object MkDir extends Command {
       val directory = args.head
       if (state.cwd.hasEntry(directory)) state.out(s"mkdir: ${directory}: File exists")
       else {
-        val newRoot = state.root.addEntry(new Dir(directory), state.cwd.absolutePath)
-        val newCwd = if (state.cwd.isRoot) newRoot
-          else newRoot.findEntry(state.cwd.name, state.cwd.path) match {
-            case Some(dir: Dir) => dir
-            case _ => throw new RuntimeException("error: cannot find cwd in the filesystem")
-          }
+        val newRoot = state.root.addEntry(Dir(directory), state.cwd.absolutePath)
 
         state
-          .copy(root = newRoot, cwd = newCwd)
+          .changeRoot(newRoot)
           .cleanOut()
       }
     }

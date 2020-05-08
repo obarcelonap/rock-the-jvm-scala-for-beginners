@@ -8,4 +8,14 @@ case class State(
                 ) {
   def out(message: String): State = copy(out = message)
   def cleanOut(): State = copy(out = "")
+  def changeRoot(newRoot: Dir): State = {
+    val newCwd =
+      if (cwd.isRoot) newRoot
+      else newRoot.findEntry(cwd.name, cwd.path) match {
+        case Some(dir: Dir) => dir
+        case _ => throw new RuntimeException("error: cannot find cwd in the filesystem")
+      }
+
+    copy(root = newRoot, cwd = newCwd)
+  }
 }
