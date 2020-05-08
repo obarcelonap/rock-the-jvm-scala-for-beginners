@@ -8,9 +8,9 @@ object Paths {
   val PREV_DIR: String = ".."
 
   def isRoot(path: String): Boolean = SEPARATOR.equals(path)
-  def startsFromRoot(path: String): Boolean = path.startsWith(SEPARATOR);
+  def isAbsolutePath(path: String): Boolean = path.startsWith(SEPARATOR);
 
-  def fullPath(name: String, path: String): String = {
+  def absolutePath(name: String, path: String): String = {
     val separator = if (Paths.isRoot(path)) "" else Paths.SEPARATOR
     s"$path$separator$name"
   }

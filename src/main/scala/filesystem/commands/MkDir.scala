@@ -11,7 +11,7 @@ object MkDir extends Command {
       val directory = args.head
       if (state.cwd.hasEntry(directory)) state.out(s"mkdir: ${directory}: File exists")
       else {
-        val newRoot = state.root.addEntry(new Dir(directory), state.cwd.fullPath)
+        val newRoot = state.root.addEntry(new Dir(directory), state.cwd.absolutePath)
         val newCwd = if (state.cwd.isRoot) newRoot
           else newRoot.findEntry(state.cwd.name, state.cwd.path) match {
             case Some(dir: Dir) => dir

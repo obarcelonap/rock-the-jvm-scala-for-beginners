@@ -9,8 +9,8 @@ object Cd extends Command {
     if (args.isEmpty || Paths.isRoot(args.head)) state.copy(cwd = state.root).cleanOut()
     else {
       val absolutePath =
-        if (Paths.startsFromRoot(args.head)) args.head
-        else s"${state.cwd.fullPath}/${args.head}"
+        if (Paths.isAbsolutePath(args.head)) args.head
+        else s"${state.cwd.absolutePath}/${args.head}"
 
       val segments = Paths.collapse(Paths.splitInSegments(absolutePath))
       if (segments.isEmpty)

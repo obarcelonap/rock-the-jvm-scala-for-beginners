@@ -11,7 +11,7 @@ object Touch extends Command {
       val filename = args.head
       if (state.cwd.hasEntry(filename)) state.out(s"touch: ${filename}: File exists")
       else {
-        val newRoot = state.root.addEntry(File(filename), state.cwd.fullPath)
+        val newRoot = state.root.addEntry(File(filename), state.cwd.absolutePath)
         val newCwd = if (state.cwd.isRoot) newRoot
         else newRoot.findEntry(state.cwd.name, state.cwd.path) match {
           case Some(dir: Dir) => dir

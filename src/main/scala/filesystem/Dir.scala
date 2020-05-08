@@ -5,8 +5,8 @@ import scala.annotation.tailrec
 case class Dir(name: String, path: String = "", entries: List[FileEntry] = List())
   extends FileEntry {
 
-  val fullPath: String = Paths.fullPath(name, path)
-  val isRoot: Boolean = Paths.isRoot(fullPath)
+  val absolutePath: String = Paths.absolutePath(name, path)
+  val isRoot: Boolean = Paths.isRoot(absolutePath)
 
   def hasEntry(name: String): Boolean = findEntry(name).isDefined
 
@@ -40,7 +40,7 @@ case class Dir(name: String, path: String = "", entries: List[FileEntry] = List(
     }
 
     if (path.isEmpty) {
-      copy(entries = entries :+ entry.withPath(fullPath))
+      copy(entries = entries :+ entry.withPath(absolutePath))
     } else
       addEntryRec(this, Paths.splitAndCollapse(path))
   }
