@@ -16,6 +16,7 @@ object Command {
     case Touch.NAME => Touch
     case Cd.NAME => Cd
     case Rm.NAME => Rm
+    case Echo.NAME => Echo
     case _ => NotFound(name)
   }
 }
