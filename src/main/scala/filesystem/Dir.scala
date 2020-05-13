@@ -58,7 +58,6 @@ case class Dir(name: String, path: String = "", entries: List[FileEntry] = List(
     deleteEntryRec(this, Paths.segments(path))
   }
 
-  override def withPath(path: String): FileEntry = copy(path = path)
 }
 
 object Dir {

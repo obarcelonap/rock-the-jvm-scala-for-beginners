@@ -8,7 +8,6 @@ object Paths {
   val PREV_DIR: String = ".."
 
   def isRoot(path: String): Boolean = SEPARATOR.equals(path)
-  def isAbsolute(path: String): Boolean = path.startsWith(SEPARATOR)
 
   def concat(paths: String*): String = asPath(paths.flatMap(segments))
   def segments(path: String): List[String] =
