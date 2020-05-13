@@ -7,7 +7,7 @@ object Echo extends Command {
 
   override def apply(state: State, args: List[String]): State = args match {
     case contentParts :+ ">" :+ filePath => addOrReplaceFile(state, filePath, makeContent(contentParts))
-    case contentParts :+ ">>" :+ filePath => appendOrCreateFile(state, filePath, makeContent(contentParts))
+    case contentParts :+ ">>" :+ filePath => appendOrAddFile(state, filePath, makeContent(contentParts))
     case _ => state.out(makeContent(args))
   }
 
@@ -17,8 +17,9 @@ object Echo extends Command {
         .deleteEntry(filePath)
         .addEntry(File.fromFullPath(filePath, content))
     )
+    .cleanOut()
 
-  private def appendOrCreateFile(state: State, filePath: String, content: String): State = {
+  private def appendOrAddFile(state: State, filePath: String, content: String): State = {
     val newContent = state.root.findEntry(filePath) match {
       case Some(File(_, _, prevContent)) => makeContent(prevContent, content)
       case _ => content
