@@ -62,7 +62,7 @@ case class Dir(name: String, path: String = "", entries: List[FileEntry] = List(
 }
 
 object Dir {
-  def fromFullPath(path: String): FileEntry = {
+  def fromFullPath(path: String): Dir = {
     val directoryPathSegments :+ directoryName = Paths.segments(path)
     Dir(directoryName, Paths.asPath(directoryPathSegments))
   }
