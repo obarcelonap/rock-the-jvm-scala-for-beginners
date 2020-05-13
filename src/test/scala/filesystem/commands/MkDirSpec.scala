@@ -53,7 +53,7 @@ class MkDirSpec extends AnyFunSpec with Inside with Matchers {
       }
     }
     it("should output error when dir already exists") {
-      val rootDir = RootDir.copy(entries = List(Dir("1st")))
+      val rootDir = RootDir.copy(entries = List(Dir("1st", "/")))
       val state = State(root = rootDir, cwd = rootDir)
 
       val newState = MkDir(state, List("1st"))

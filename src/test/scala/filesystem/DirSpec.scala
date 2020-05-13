@@ -8,56 +8,67 @@ class DirSpec extends AnyFunSpec with Matchers with Inside with OptionValues {
 
   describe("findEntry") {
     it("should return empty when no entries") {
-      val dir = Dir("empty")
-
-      val entry = dir.findEntry("anything", "/does/not/matter")
+      val entry = RootDir.findEntry("/anything")
 
       entry should be(empty)
     }
 
     it("should return empty when entries does not match the initial path") {
-      val dir = Dir("a", "/", List(Dir("b"), Dir("c")))
+      val dir = RootDir.copy(entries = List(
+        Dir("a", "/", List(
+          Dir("b", "/a"),
+          Dir("c", "/a"),
+        )),
+      ))
 
-      val entry = dir.findEntry("anything", "/does/not/matter")
+      val entry = dir.findEntry("/b/c")
 
       entry should be(empty)
     }
 
     it("should return empty when entries does not match the path after some match") {
-      val dir = Dir("a", "/", List(Dir("b"), Dir("c")))
+      val dir = RootDir.copy(entries = List(
+        Dir("a", "/", List(
+          Dir("b", "/a"),
+          Dir("c", "/a"),
+        )),
+      ))
 
-      val entry = dir.findEntry("anything", "/a/not-expected")
+      val entry = dir.findEntry("/a/not-expected/b")
 
       entry should be(empty)
     }
 
     it("should return the dir when is found nested at one level") {
-      val expected = Dir("expected", "/a/c/")
-      val dir = Dir("a", "/",
-        List(Dir("b"), Dir("c", "/a/",
-          List(expected))))
+      val dir = RootDir.copy(entries = List(
+        Dir("a", "/", List(
+          Dir("b", "/a"),
+          Dir("c", "/a"),
+        )),
+      ))
 
-      val entry = dir.findEntry("expected", "/c/")
+      val entry = dir.findEntry("/a")
 
-      entry should be(Some(expected))
+      entry.value.name should be("a")
     }
 
     it("should return the dir when is found nested at two levels") {
-      val expected = Dir("expected", "/a/b/c/")
-      val dir = Dir("a", "/",
-        List(Dir("b", "/a/",
-          List(Dir("c", "/a/b/",
-            List(expected))))))
+      val dir = RootDir.copy(entries = List(
+        Dir("a", "/", List(
+          Dir("b", "/a"),
+          Dir("c", "/a"),
+        )),
+      ))
 
-      val entry = dir.findEntry("expected", "/b/c/")
+      val entry = dir.findEntry("/a/b")
 
-      entry should be(Some(expected))
+      entry.value.name should be("b")
     }
   }
 
   describe("addEntry") {
     it("adds a dir at root when path is empty") {
-      val newRoot = RootDir.addEntry(Dir("a"))
+      val newRoot = RootDir.addEntry(Dir("a", "/"))
 
       inside(newRoot) {
         case Dir(_, _, List(Dir(name, path, _))) =>
@@ -67,7 +78,7 @@ class DirSpec extends AnyFunSpec with Matchers with Inside with OptionValues {
     }
 
     it("does nothing at root when path is not found") {
-      val newRoot = RootDir.addEntry(Dir("a"), "/does/not/exist")
+      val newRoot = RootDir.addEntry(Dir("a", "/does/not/exist"))
 
       inside(newRoot) {
         case Dir(_, _, entries) =>
@@ -75,18 +86,8 @@ class DirSpec extends AnyFunSpec with Matchers with Inside with OptionValues {
       }
     }
 
-    it("adds an entry at the same dir when path is empty") {
-      val newRoot = Dir("a").addEntry(Dir("b"))
-
-      inside(newRoot) {
-        case Dir(_, _, List(Dir(name, path, _))) =>
-          name should be ("b")
-          path should be ("/a")
-      }
-    }
-
     it("does nothing when path is not found") {
-      val newRoot = Dir("a").addEntry(Dir("b"), "/does/not/exist")
+      val newRoot = Dir("a").addEntry(Dir("b", "/does/not/exist"))
 
       inside(newRoot) {
         case Dir(_, _, entries) =>
@@ -95,19 +96,19 @@ class DirSpec extends AnyFunSpec with Matchers with Inside with OptionValues {
     }
 
     it("adds an entry in a nested dir when path has a value") {
-      val newRoot = Dir("a")
-        .addEntry(Dir("b"))
-        .addEntry(Dir("c"), "/b")
+      val newRoot = RootDir
+        .addEntry(Dir("a", "/"))
+        .addEntry(Dir("b", "/a"))
 
 
       inside(newRoot) {
         case Dir(name1, path1, List(Dir(name2, path2, List(Dir(name3, path3, _))))) =>
-          name1 should be ("a")
-          path1 should be ("")
-          name2 should be ("b")
-          path2 should be ("/a")
-          name3 should be ("c")
-          path3 should be ("/a/b")
+          name1 should be ("")
+          path1 should be ("/")
+          name2 should be ("a")
+          path2 should be ("/")
+          name3 should be ("b")
+          path3 should be ("/a")
       }
     }
   }

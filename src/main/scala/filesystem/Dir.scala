@@ -5,50 +5,46 @@ import scala.annotation.tailrec
 case class Dir(name: String, path: String = "", entries: List[FileEntry] = List())
   extends FileEntry {
 
-  val absolutePath: String = Paths.absolutePath(name, path)
-  val isRoot: Boolean = Paths.isRoot(absolutePath)
+  val isRoot: Boolean = Paths.isRoot(fullPath)
 
   def hasEntry(name: String): Boolean = findEntry(name).isDefined
 
-  def findEntry(name: String, path: String = ""): Option[FileEntry] = {
+  def findEntry(path: String): Option[FileEntry] = {
     @tailrec
-    def findDirRec(currentDir: Dir, pathSegments: List[String]): Option[FileEntry] =
-      if (pathSegments.isEmpty) currentDir.findEntry(name)
-      else currentDir.findEntry(pathSegments.head) match {
-        case Some(nextDir: Dir) => findDirRec(nextDir, pathSegments.tail)
+    def findEntryRec(currentDir: Dir, pathSegments: List[String]): Option[FileEntry] =
+      pathSegments match {
+        case entryName :: Nil => currentDir.entries.find(_.name.equals(entryName))
+        case nextSegment :: moreSegments => currentDir.entries.find(_.name.equals(nextSegment)) match {
+          case Some(nextDir: Dir) => findEntryRec(nextDir, moreSegments)
+          case _ => None
+        }
         case _ => None
       }
 
-    if (path.isEmpty)
-      entries.find(entry => entry.name.equals(name))
-    else
-      findDirRec(this, Paths.splitAndCollapse(path))
+    findEntryRec(this, Paths.segments(path))
   }
 
-  def addEntry(entry: FileEntry, path: String = ""): Dir = {
+  def addEntry(entry: FileEntry): Dir = {
     def addEntryRec(currentDir: Dir, pathSegments: List[String]): Dir = {
-      if (pathSegments.isEmpty) currentDir.addEntry(entry)
-      else {
-        val NextSegment: String = pathSegments.head
+      pathSegments match {
+        case List() => currentDir.copy(entries = currentDir.entries :+ entry)
+        case _ =>
+          val NextSegment: String = pathSegments.head
 
-        currentDir.copy(entries = currentDir.entries.map {
-          case nextDir@Dir(NextSegment, _, _) =>
-            addEntryRec(nextDir, pathSegments.tail)
-          case entry => entry
-        })
+          currentDir.copy(entries = currentDir.entries.map {
+            case nextDir@Dir(NextSegment, _, _) => addEntryRec(nextDir, pathSegments.tail)
+            case entry => entry
+          })
       }
     }
 
-    if (path.isEmpty) {
-      copy(entries = entries :+ entry.withPath(absolutePath))
-    } else
-      addEntryRec(this, Paths.splitAndCollapse(path))
+    addEntryRec(this, Paths.segments(entry.path))
   }
 
-  def deleteEntry(name: String, path: String = ""): Dir = {
-    def deleteEntryRec(currentDir: Dir, pathSegments: List[String]): Dir =
+  def deleteEntry(path: String): Dir = {
+    def deleteEntryRec(currentDir: Dir, pathSegments: List[String]): Dir = {
       pathSegments match {
-        case List() => currentDir.deleteEntry(name)
+        case entryName :: Nil => currentDir.copy(entries = currentDir.entries.filterNot(_.name.equals(entryName)))
         case _ =>
           val NextSegment: String = pathSegments.head
 
@@ -57,14 +53,19 @@ case class Dir(name: String, path: String = "", entries: List[FileEntry] = List(
             case entry => entry
           })
       }
+    }
 
-    if (path.isEmpty)
-      copy(entries = entries.filterNot(_.name.equals(name)))
-    else
-      deleteEntryRec(this, Paths.splitAndCollapse(path))
+    deleteEntryRec(this, Paths.segments(path))
   }
 
   override def withPath(path: String): FileEntry = copy(path = path)
 }
 
-object RootDir extends Dir("", "") {}
+object Dir {
+  def fromFullPath(path: String): FileEntry = {
+    val directoryPathSegments :+ directoryName = Paths.segments(path)
+    Dir(directoryName, Paths.asPath(directoryPathSegments))
+  }
+}
+
+object RootDir extends Dir("", "/") {}

@@ -1,30 +1,28 @@
 package filesystem.commands
 
+import filesystem.Paths.{absolutePath, relativePath}
+import filesystem.commands.MkDir.mkdir
 import filesystem.{Dir, Paths, State}
 
 object Cd extends Command {
   override val NAME: String = "cd"
 
-  override def apply(state: State, args: List[String]): State =
-    if (args.isEmpty || Paths.isRoot(args.head)) state.copy(cwd = state.root).cleanOut()
-    else {
-      val absolutePath =
-        if (Paths.isAbsolutePath(args.head)) args.head
-        else s"${state.cwd.absolutePath}/${args.head}"
+  override def apply(state: State, args: List[String]): State = args match {
+    case List(absolutePath(path)) => cd(state, path)
+    case List(relativePath(path)) => cd(state, Paths.concat(state.cwd.fullPath, path))
+    case _ => state.out("usage: cd directory")
+  }
 
-      val segments = Paths.collapse(Paths.splitInSegments(absolutePath))
-      if (segments.isEmpty)
-        return state.copy(cwd = state.root).cleanOut()
-      if (segments.equals(Paths.splitInSegments(state.cwd.path)))
-        return state
-
-      val path = segments.init
-      val directory = segments.last
-
-      state.root.findEntry(directory, path.mkString("/")) match {
-        case Some(dir: Dir) => state.copy(cwd = dir).cleanOut()
-        case Some(_) => state.out(s"cd: not a directory: $directory")
-        case _ => state.out(s"cd: no such file or directory: $directory")
-      }
+  private def cd(state: State, path: String): State = {
+    val directoryPath = Paths.collapse(path)
+    if (Paths.isRoot(directoryPath)) {
+      return state.copy(cwd = state.root).cleanOut()
     }
+
+    state.root.findEntry(directoryPath) match {
+      case Some(dir: Dir) => state.copy(cwd = dir).cleanOut()
+      case Some(_) => state.out(s"cd: not a directory: ${Paths.segments(directoryPath).last}")
+      case _ => state.out(s"cd: no such file or directory: ${Paths.segments(directoryPath).last}")
+    }
+  }
 }

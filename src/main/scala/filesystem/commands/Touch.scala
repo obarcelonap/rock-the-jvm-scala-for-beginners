@@ -1,21 +1,24 @@
 package filesystem.commands
 
-import filesystem.{Dir, File, State}
+import filesystem.Paths.{absolutePath, relativePath}
+import filesystem.{Dir, File, Paths, State}
 
 object Touch extends Command {
   override val NAME: String = "touch"
 
   override def apply(state: State = State(), args: List[String] = List()): State = args match {
-    case List(filename) =>
-      if (state.cwd.hasEntry(filename))
-        state.out(s"touch: ${filename}: File exists")
-      else
-        touch(state, filename)
-    case _ => state.out("usage: touch filename")
+    case List(absolutePath(path)) => touch(state, path)
+    case List(relativePath(path)) => touch(state, Paths.concat(state.cwd.fullPath, path))
+    case _ => state.out("usage: touch file")
   }
 
-  private def touch(state: State, filename: String): State = {
-    val newRoot = state.root.addEntry(File(filename), state.cwd.absolutePath)
+  private def touch(state: State, path: String): State = {
+    val filePath = Paths.collapse(path)
+    if (state.root.findEntry(filePath).isDefined) {
+      return state.out(s"touch: $filePath: File exists")
+    }
+
+    val newRoot = state.root.addEntry(File.fromFullPath(filePath))
 
     state
       .changeRoot(newRoot)

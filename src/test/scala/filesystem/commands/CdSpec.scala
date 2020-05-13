@@ -40,7 +40,7 @@ class CdSpec extends AnyFunSpec with Matchers with Inside {
       }
     }
     it("sets cwd to the specified relative dir") {
-      val rootDir = RootDir.addEntry(Dir("a"))
+      val rootDir = RootDir.addEntry(Dir("a", "/"))
       val state = State(root = rootDir, cwd = rootDir)
 
       val newState = Cd(state, List("a"))
@@ -54,7 +54,7 @@ class CdSpec extends AnyFunSpec with Matchers with Inside {
     it("sets cwd to the specified relative dir at 2nd level") {
       val rootDir = RootDir
         .addEntry(Dir("a"))
-        .addEntry(Dir("b"), "a")
+        .addEntry(Dir("b", "/a"))
       val state = State(root = rootDir, cwd = rootDir)
 
       val newState = Cd(state, List("a/b"))
